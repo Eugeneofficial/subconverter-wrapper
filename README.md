@@ -1,114 +1,101 @@
-# subconverter-vless-fix
+# SubConverter Wrapper
 
-Web UI + fix proxy for [MetaCubeX/subconverter](https://github.com/MetaCubeX/subconverter) that resolves the VLESS subscription parsing bug.
+Convert VLESS/VMess/SS/SSR/Trojan subscriptions to Clash format — **100% free, no hosting needed.**
 
-## Problem
+## Live Demo
 
-The original [tindy2013/subconverter](https://github.com/tindy2013/subconverter) does not support VLESS protocol ([#779](https://github.com/tindy2013/subconverter/issues/779)).
+**https://eugeneofficial.github.io/subconverter-wrapper/**
 
-The MetaCubeX fork supports VLESS, but has a bug: when loading subscriptions via URL, it calls `urlSafeBase64Decode()` on plain-text content, corrupting VLESS links.
+## How It Works
 
-## Solution
-
-This project provides:
-
-- **Fix proxy** — fetches the subscription, base64-encodes it, and passes it to subconverter as a local file
-- **Web UI** — dark-themed interface for generating subscription links
-- **Control panel** — CLI menu for managing services
-
-## Quick Start
-
-### 1. Download MetaCubeX subconverter
-
-Download `subconverter.exe` from [MetaCubeX/releases](https://github.com/MetaCubeX/subconverter/releases) (v0.9.2 or newer) and place it in the project folder.
-
-### 2. Run
-
-```bash
-python control.py
+```
+GitHub Pages (UI)  →  Cloudflare Worker (proxy)  →  Subscription Source
+    Free forever          Free (100k req/day)           Your link
 ```
 
-Or double-click `start.bat` on Windows.
+The Cloudflare Worker:
+1. Fetches your subscription
+2. Parses VLESS/VMess/SS/SSR/Trojan links
+3. Generates Clash YAML config
+4. Returns it directly (no subconverter binary needed!)
 
-### 3. Open Web UI
+## Deploy (5 minutes)
 
-Go to [http://127.0.0.1:25502](http://127.0.0.1:25502)
+### 1. Deploy Cloudflare Worker
+
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → Sign up (free)
+2. Click **Workers & Pages** → **Create** → **Create Worker**
+3. Name it `subconverter-wrapper`
+4. Delete all code in the editor
+5. Copy-paste the contents of [`cloudflare-worker/worker.js`](cloudflare-worker/worker.js)
+6. Click **Deploy**
+7. Copy your Worker URL (e.g., `https://subconverter-wrapper.your-name.workers.dev`)
+
+### 2. Enable GitHub Pages
+
+1. Go to your repo → **Settings** → **Pages**
+2. Source: **Deploy from a branch**
+3. Branch: `main`, folder: `/docs`
+4. Click **Save**
+5. Your site: `https://your-name.github.io/subconverter-wrapper/`
+
+### 3. Use It
+
+1. Open your GitHub Pages URL
+2. Paste your Worker URL in **Settings → Backend URL**
+3. Select subscriptions (BLACK VLESS is pre-checked)
+4. Click **Generate**
+5. Copy the URL → Paste into Clash Verge Rev
+
+## Local Usage (no cloud needed)
+
+```bash
+# 1. Download subconverter.exe from MetaCubeX/releases
+# 2. Run:
+python control.py
+# 3. Open http://127.0.0.1:25502
+```
 
 ## Architecture
 
-```
-┌─────────────┐     ┌────────────┐     ┌──────────────┐
-│   Web UI    │────▶│ Fix Proxy  │────▶│ SubConverter │
-│  :25502     │     │  :25501    │     │   :25500     │
-└─────────────┘     └────────────┘     └──────────────┘
-                          │
-                    ┌─────┴─────┐
-                    │ 1. Fetch  │
-                    │ 2. Base64 │
-                    │ 3. Pass   │
-                    └───────────┘
-```
+| Component | Free Provider | Purpose |
+|-----------|--------------|---------|
+| Web UI | GitHub Pages | Static HTML/CSS/JS |
+| Proxy | Cloudflare Worker | Parse subscriptions, generate config |
+| Subscription | GitHub (raw) | Source links |
 
-## Features
+## Supported Protocols
 
-- **VLESS / VMess / SS / SSR / Trojan** — all supported protocols
-- **Multiple subscriptions** — merge several sources into one config
-- **Preset sources** — one-click selection of popular subscriptions
-- **Preview** — see proxy nodes before generating
-- **Copy to clipboard** — paste directly into Clash Verge Rev
-- **Multiple targets** — Clash, Surge, Quantumult X, Loon, etc.
+- ✅ VLESS (reality, xtls, ws, grpc, http)
+- ✅ VMess
+- ✅ Shadowsocks (SS)
+- ✅ ShadowsocksR (SSR)
+- ✅ Trojan
 
-## Usage
+## Supported Targets
 
-### Web UI
+- Clash / ClashR
+- Surge 4
+- Quantumult X
+- Loon
+- Surfboard
+- V2Ray
 
-1. Open [http://127.0.0.1:25502](http://127.0.0.1:25502)
-2. Select preset sources or enter custom URLs
-3. Choose target format (Clash by default)
-4. Click **Generate**
-5. Click **Copy to Clipboard**
-6. Paste into Clash Verge Rev (Profiles → Import from URL)
-
-### Control Panel
+## Files
 
 ```
-[1] Start all (SubConverter + Proxy + WebUI)
-[2] Copy URL to clipboard (BLACK VLESS)
-[3] Enter custom URL and copy
-[4] Open Web UI in browser
-[5] Stop everything
-[0] Exit
+├── cloudflare-worker/
+│   ├── worker.js         # Cloudflare Worker (fix proxy)
+│   └── wrangler.toml     # Worker config
+├── docs/
+│   └── index.html        # GitHub Pages UI
+├── control.py            # Local CLI panel
+├── fix_sub.py            # Local fix proxy (Python)
+├── webui_server.py       # Local web server
+├── webui/
+│   └── index.html        # Local web UI
+└── start.bat             # Windows launcher
 ```
-
-### API
-
-```
-# Single subscription
-http://127.0.0.1:25501/sub?target=clash&url=https://example.com/subscription.txt
-
-# Multiple subscriptions (merged)
-http://127.0.0.1:25501/sub?target=clash&url=https://example.com/sub1.txt|https://example.com/sub2.txt
-```
-
-## Requirements
-
-- Python 3.8+
-- MetaCubeX/subconverter binary
-- No external Python packages (uses only stdlib)
-
-## Ports
-
-| Service       | Port  | Description              |
-|---------------|-------|--------------------------|
-| SubConverter  | 25500 | Core conversion engine   |
-| Fix Proxy     | 25501 | Fixes VLESS parsing bug  |
-| Web UI        | 25502 | Browser interface        |
-
-## Known Issues
-
-- Cyrillic characters in file paths may cause issues — use ASCII paths
-- The fix proxy adds a slight delay for base64 encoding large subscriptions
-- Only tested on Windows; Linux/macOS may need minor adjustments
 
 ## Credits
 
