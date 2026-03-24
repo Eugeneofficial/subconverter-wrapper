@@ -1,0 +1,46 @@
+# SubConverter binary & data
+subconverter.exe
+subconverter_old_backup.exe
+base/
+config/
+profiles/
+rules/
+snippets/
+
+# Cache
+cache/
+sub_cache/
+
+# Config (has personal settings)
+pref.toml
+pref.example.*
+generate.ini
+gistconf.ini
+
+# Generated configs
+*.yaml
+*.yml
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+desktop.ini
+nul
+
+# Temp
+*.tmp
+*.7z
+
+# Misc
+subscription.txt.txt
