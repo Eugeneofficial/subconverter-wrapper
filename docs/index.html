@@ -507,11 +507,11 @@ function toast(msg,err){
   setTimeout(()=>t.className='toast',2500);
 }
 
-// Auto-generate on load
+// Auto-check presets on load, but DON'T auto-generate
 window.addEventListener('DOMContentLoaded',()=>{
   const cb=document.querySelector('.preset-cb[value="BLACK_VLESS_RUS.txt"]');
   if(cb){cb.checked=true;cb.parentElement.classList.add('active')}
-  if(getBackend())generate();
+  // Don't auto-generate — let user click the button
 });
 
 // Health check
