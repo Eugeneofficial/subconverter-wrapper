@@ -82,6 +82,7 @@ select:focus{border-color:#667eea}
             <label>Backend URL (Cloudflare Worker)</label>
             <input type="text" id="backendUrl" placeholder="https://your-worker.workers.dev">
             <button class="btn btn-sm" onclick="testBackend()" style="margin-top:8px">Test Connection</button>
+            <button class="btn btn-sm" onclick="resetBackend()" style="margin-top:8px;margin-left:4px">Reset</button>
         </div>
     </div>
 
@@ -156,15 +157,24 @@ document.querySelectorAll('.preset-cb').forEach(cb => {
 // Default backend URL
 const DEFAULT_BACKEND = 'https://subconverter-wrapper.abramovplay.workers.dev';
 
-// Load saved backend URL
-const savedBackend = localStorage.getItem('backendUrl');
-document.getElementById('backendUrl').value = savedBackend || DEFAULT_BACKEND;
-
 function getBackend() {
     let url = document.getElementById('backendUrl').value.trim().replace(/\/+$/, '');
-    if (!url || !url.startsWith('http')) url = DEFAULT_BACKEND;
+    // Validate: must be a valid URL and not a subscription URL
+    if (!url || !url.startsWith('https://') || url.includes('raw.githubusercontent.com') || url.includes('.txt') || !url.includes('workers.dev')) {
+        url = DEFAULT_BACKEND;
+        document.getElementById('backendUrl').value = url;
+    }
     localStorage.setItem('backendUrl', url);
     return url;
+}
+
+// Load saved backend URL (with validation)
+const savedBackend = localStorage.getItem('backendUrl');
+if (savedBackend && savedBackend.startsWith('https://') && savedBackend.includes('workers.dev')) {
+    document.getElementById('backendUrl').value = savedBackend;
+} else {
+    document.getElementById('backendUrl').value = DEFAULT_BACKEND;
+    localStorage.setItem('backendUrl', DEFAULT_BACKEND);
 }
 
 function getAllUrls() {
@@ -172,6 +182,13 @@ function getAllUrls() {
     document.querySelectorAll('.preset-cb:checked').forEach(cb => urls.push(BASE + cb.value));
     document.getElementById('urls').value.trim().split('\n').forEach(u => { u = u.trim(); if (u) urls.push(u); });
     return urls;
+}
+
+function resetBackend() {
+    localStorage.removeItem('backendUrl');
+    document.getElementById('backendUrl').value = DEFAULT_BACKEND;
+    toast('Reset to default!');
+    setTimeout(() => location.reload(), 500);
 }
 
 async function testBackend() {
