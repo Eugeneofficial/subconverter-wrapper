@@ -184,11 +184,15 @@ async function testBackend() {
         const controller = new AbortController();
         setTimeout(() => controller.abort(), 15000);
         const resp = await fetch(backend + '/health', { signal: controller.signal });
-        const data = await resp.json();
-        if (data.status === 'ok') {
+        const raw = await resp.text();
+        if (raw.includes('"ok"') || raw.includes('ok')) {
             text.textContent = 'Backend connected!';
             dot.className = 'dot ok';
             toast('Connection OK!');
+        } else {
+            text.textContent = 'Unexpected response: ' + raw.substring(0, 50);
+            dot.className = 'dot err';
+            toast('Unexpected response!', 1);
         }
     } catch (e) {
         text.textContent = 'Failed: ' + e.message;
@@ -286,10 +290,13 @@ window.addEventListener('DOMContentLoaded', () => {
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         const resp = await fetch(backend + '/health', { signal: controller.signal });
         clearTimeout(timeoutId);
-        const data = await resp.json();
-        if (data.status === 'ok') {
+        const raw = await resp.text();
+        if (raw.includes('"ok"') || raw.includes('ok')) {
             document.getElementById('statusText').textContent = 'Backend connected';
             document.getElementById('statusDot').className = 'dot ok';
+        } else {
+            document.getElementById('statusText').textContent = 'Backend responded but unexpected';
+            document.getElementById('statusDot').className = 'dot err';
         }
     } catch (e) {
         document.getElementById('statusText').textContent = 'Backend unreachable (click Generate to try anyway)';
