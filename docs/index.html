@@ -405,6 +405,7 @@ select{cursor:pointer;appearance:none;
 const BASE='https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/';
 const DEFAULT_BACKEND='https://subconverter-wrapper.abramovplay.workers.dev';
 let generatedUrl='';
+let fullConfig='';
 
 // Preset checkboxes
 document.querySelectorAll('.preset-cb').forEach(cb=>{
@@ -477,8 +478,9 @@ async function fetchPreview(url){
   card.style.display='block';content.textContent='⏳ Loading...';count.textContent='...';
   try{
     const r=await fetch(url),text=await r.text();
-    content.textContent=text.substring(0,8000);
-    if(text.length>8000)content.textContent+='\n\n... truncated';
+    fullConfig=text;
+    content.textContent=text.substring(0,15000);
+    if(text.length>15000)content.textContent+='\n\n... truncated (download for full config)';
     const m=text.match(/type:\s*(vless|vmess|ss|ssr|trojan|snell|hysteria|tuic|anytls)/gi);
     count.textContent=(m?m.length:0)+' nodes';
   }catch(e){content.textContent='❌ '+e.message;count.textContent='error'}
@@ -492,10 +494,10 @@ function copyResult(){
   toast('Copied!');
 }
 
-function copyConfig(){navigator.clipboard.writeText(document.getElementById('previewContent').textContent);toast('Config copied!')}
+function copyConfig(){navigator.clipboard.writeText(fullConfig);toast('Config copied!')}
 
 function downloadConfig(){
-  const b=new Blob([document.getElementById('previewContent').textContent],{type:'text/yaml'});
+  const b=new Blob([fullConfig],{type:'text/yaml'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='clash-config.yaml';a.click();toast('Saved!');
 }
 
