@@ -81,6 +81,7 @@ select:focus{border-color:#667eea}
         <div class="coll-content" style="overflow:visible">
             <label>Backend URL (Cloudflare Worker)</label>
             <input type="text" id="backendUrl" placeholder="https://your-worker.workers.dev">
+            <button class="btn btn-sm" onclick="testBackend()" style="margin-top:8px">Test Connection</button>
         </div>
     </div>
 
@@ -173,6 +174,29 @@ function getAllUrls() {
     return urls;
 }
 
+async function testBackend() {
+    const backend = getBackend();
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    text.textContent = 'Testing...';
+    dot.className = 'dot';
+    try {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 15000);
+        const resp = await fetch(backend + '/health', { signal: controller.signal });
+        const data = await resp.json();
+        if (data.status === 'ok') {
+            text.textContent = 'Backend connected!';
+            dot.className = 'dot ok';
+            toast('Connection OK!');
+        }
+    } catch (e) {
+        text.textContent = 'Failed: ' + e.message;
+        dot.className = 'dot err';
+        toast('Connection failed!', 1);
+    }
+}
+
 function generate() {
     const backend = getBackend();
     if (!backend) { toast('Set backend URL first!', 1); return; }
@@ -258,14 +282,17 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
     try {
-        const resp = await fetch(backend + '/health', { signal: AbortSignal.timeout(5000) });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const resp = await fetch(backend + '/health', { signal: controller.signal });
+        clearTimeout(timeoutId);
         const data = await resp.json();
         if (data.status === 'ok') {
             document.getElementById('statusText').textContent = 'Backend connected';
             document.getElementById('statusDot').className = 'dot ok';
         }
     } catch (e) {
-        document.getElementById('statusText').textContent = 'Backend unreachable';
+        document.getElementById('statusText').textContent = 'Backend unreachable (click Generate to try anyway)';
         document.getElementById('statusDot').className = 'dot err';
     }
 })();
