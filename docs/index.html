@@ -4,321 +4,521 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SubConverter Wrapper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f0f23;color:#e0e0e0;min-height:100vh;display:flex;flex-direction:column;align-items:center}
-.container{max-width:820px;width:100%;padding:30px 20px}
-h1{text-align:center;font-size:2rem;margin-bottom:6px;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sub{text-align:center;color:#666;margin-bottom:24px;font-size:.85rem}
-.card{background:#1a1a2e;border-radius:14px;padding:22px;margin-bottom:16px;border:1px solid #2a2a4a}
-.card h2{font-size:1rem;margin-bottom:14px;color:#a0a0d0;display:flex;align-items:center;gap:8px}
-label{display:block;margin-bottom:5px;font-size:.82rem;color:#777}
-textarea{width:100%;padding:12px;background:#0f0f23;border:1px solid #3a3a5a;border-radius:10px;color:#e0e0e0;font-size:.9rem;outline:none;resize:vertical;font-family:inherit;min-height:80px;transition:border-color .2s}
-textarea:focus{border-color:#667eea}
-input[type="text"]{width:100%;padding:10px 14px;background:#0f0f23;border:1px solid #3a3a5a;border-radius:10px;color:#e0e0e0;font-size:.9rem;outline:none;transition:border-color .2s}
-input[type="text"]:focus{border-color:#667eea}
-select{width:100%;padding:10px 14px;background:#0f0f23;border:1px solid #3a3a5a;border-radius:10px;color:#e0e0e0;font-size:.9rem;outline:none;cursor:pointer}
-select:focus{border-color:#667eea}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border:none;border-radius:10px;font-size:.9rem;cursor:pointer;transition:all .2s;font-weight:600}
-.btn-go{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;width:100%}
-.btn-go:hover{opacity:.9;transform:translateY(-1px)}
-.btn-sm{background:#2a2a4a;color:#c0c0e0;padding:6px 12px;font-size:.75rem}
-.btn-sm:hover{background:#3a3a5a}
-.btn-copy{background:#667eea;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:.72rem;cursor:pointer;position:absolute;top:8px;right:8px}
-.btn-copy:hover{background:#5a6fd6}
-.result{background:#0f0f23;border:1px solid #3a3a5a;border-radius:10px;padding:14px;margin-top:14px;word-break:break-all;font-family:Consolas,'Courier New',monospace;font-size:.82rem;color:#a0d0a0;display:none;position:relative}
-.ready-box{background:#0f0f23;border:2px solid #667eea;border-radius:14px;padding:20px;margin-top:14px;text-align:center;display:none}
-.ready-box .label{color:#888;font-size:.82rem;margin-bottom:10px}
-.ready-box .url{font-family:Consolas,monospace;font-size:.78rem;color:#a0d0a0;word-break:break-all;margin-bottom:14px;padding:10px;background:#1a1a2e;border-radius:8px}
-.btn-big{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;padding:14px 32px;font-size:1rem;cursor:pointer;font-weight:700;width:100%;transition:all .2s}
-.btn-big:hover{opacity:.9;transform:translateY(-1px)}
-.btn-big.done{background:#10b981}
-.preview{max-height:350px;overflow-y:auto;background:#0f0f23;border:1px solid #3a3a5a;border-radius:10px;padding:14px;margin-top:14px;font-family:Consolas,monospace;font-size:.78rem;line-height:1.5;display:none}
-.preview pre{white-space:pre-wrap}
-.badge{background:#667eea;color:#fff;padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:600}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);padding:10px 20px;border-radius:10px;font-size:.85rem;transition:transform .3s;z-index:1000;color:#fff}
+:root{
+  --bg:#07060b;
+  --card:rgba(255,255,255,.04);
+  --card-border:rgba(255,255,255,.08);
+  --card-hover:rgba(255,255,255,.06);
+  --text:#e8e6f0;
+  --text-dim:#6b6880;
+  --accent:#7c5cfc;
+  --accent2:#c84cfd;
+  --accent3:#3de8c0;
+  --danger:#ff4d6a;
+  --radius:16px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ===== Animated Background ===== */
+.bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-canvas .orb{
+  position:absolute;border-radius:50%;filter:blur(120px);opacity:.35;
+  animation:float 20s ease-in-out infinite alternate;
+}
+.bg-canvas .orb:nth-child(1){width:600px;height:600px;background:#7c5cfc;top:-10%;left:-10%;animation-delay:0s}
+.bg-canvas .orb:nth-child(2){width:500px;height:500px;background:#c84cfd;bottom:-10%;right:-10%;animation-delay:-5s}
+.bg-canvas .orb:nth-child(3){width:400px;height:400px;background:#3de8c0;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-10s;opacity:.2}
+@keyframes float{
+  0%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(30px,-50px) scale(1.1)}
+  66%{transform:translate(-20px,20px) scale(.9)}
+  100%{transform:translate(10px,-30px) scale(1.05)}
+}
+
+/* ===== Layout ===== */
+.wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:40px 20px 80px}
+
+/* ===== Hero ===== */
+.hero{text-align:center;margin-bottom:36px}
+.hero h1{
+  font-size:2.8rem;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,#fff 0%,#7c5cfc 40%,#c84cfd 70%,#3de8c0 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmer 4s ease-in-out infinite alternate;
+  background-size:200% 200%;
+}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.hero .tagline{color:var(--text-dim);font-size:.95rem;margin-top:8px;font-weight:400}
+.hero .badges{display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.hero .badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:100px;font-size:.75rem;font-weight:600;
+  background:rgba(124,92,252,.12);color:#a78bfa;border:1px solid rgba(124,92,252,.2);
+}
+.hero .badge.green{background:rgba(61,232,192,.1);color:#3de8c0;border-color:rgba(61,232,192,.2)}
+.hero .badge svg{width:14px;height:14px}
+
+/* ===== Glass Card ===== */
+.glass{
+  background:var(--card);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  padding:24px;margin-bottom:16px;
+  transition:all .3s ease;
+}
+.glass:hover{background:var(--card-hover);border-color:rgba(255,255,255,.12)}
+.glass h2{
+  font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text-dim);margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.glass h2 .icon{font-size:1rem}
+
+/* ===== Status Bar ===== */
+.status-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;border-radius:12px;margin-bottom:20px;
+  background:rgba(255,255,255,.03);border:1px solid var(--card-border);
+  font-size:.82rem;
+}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;position:relative}
+.status-dot::after{
+  content:'';position:absolute;inset:-3px;border-radius:50%;
+  border:2px solid currentColor;opacity:.3;
+  animation:ring 2s ease-out infinite;
+}
+@keyframes ring{0%{transform:scale(1);opacity:.3}100%{transform:scale(1.8);opacity:0}}
+.status-dot.ok{background:#3de8c0;color:#3de8c0}
+.status-dot.err{background:var(--danger);color:var(--danger)}
+.status-dot.wait{background:#f59e0b;color:#f59e0b}
+.status-text{color:var(--text-dim);flex:1}
+.status-text b{color:var(--text);font-weight:600}
+
+/* ===== Inputs ===== */
+label{display:block;margin-bottom:6px;font-size:.78rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em}
+input[type="text"],textarea,select{
+  width:100%;padding:12px 16px;
+  background:rgba(0,0,0,.3);
+  border:1px solid var(--card-border);
+  border-radius:12px;color:var(--text);font-size:.9rem;font-family:inherit;
+  outline:none;transition:all .25s ease;
+}
+input[type="text"]:focus,textarea:focus,select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(124,92,252,.15);
+}
+textarea{resize:vertical;min-height:80px}
+select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6880' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+}
+
+/* ===== Buttons ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:none;border-radius:12px;font-family:inherit;font-weight:600;
+  cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.btn:hover::before{opacity:1}
+.btn:active{transform:scale(.97)}
+
+.btn-primary{
+  width:100%;padding:16px;font-size:1.05rem;
+  background:linear-gradient(135deg,#7c5cfc,#c84cfd);
+  color:#fff;box-shadow:0 4px 24px rgba(124,92,252,.3);
+}
+.btn-primary:hover{box-shadow:0 8px 32px rgba(124,92,252,.45);transform:translateY(-1px)}
+
+.btn-big{
+  width:100%;padding:18px;font-size:1.1rem;
+  background:linear-gradient(135deg,#7c5cfc,#c84cfd);
+  color:#fff;box-shadow:0 4px 24px rgba(124,92,252,.3);
+  border-radius:14px;
+}
+.btn-big:hover{box-shadow:0 8px 32px rgba(124,92,252,.5);transform:translateY(-2px)}
+.btn-big.done{background:linear-gradient(135deg,#3de8c0,#10b981);box-shadow:0 4px 24px rgba(61,232,192,.3)}
+
+.btn-ghost{
+  padding:8px 16px;font-size:.78rem;
+  background:rgba(255,255,255,.05);color:var(--text-dim);
+  border:1px solid var(--card-border);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.1);color:var(--text)}
+
+.btn-icon{
+  padding:8px 12px;font-size:.75rem;
+  background:rgba(124,92,252,.15);color:#a78bfa;
+  border:1px solid rgba(124,92,252,.2);
+}
+.btn-icon:hover{background:rgba(124,92,252,.25)}
+
+/* ===== Checkboxes ===== */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.chk{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;border-radius:12px;cursor:pointer;user-select:none;
+  background:rgba(0,0,0,.2);border:1px solid var(--card-border);
+  font-size:.85rem;font-weight:500;transition:all .25s;
+}
+.chk:hover{border-color:rgba(124,92,252,.3);background:rgba(124,92,252,.05)}
+.chk.active{border-color:var(--accent);background:rgba(124,92,252,.1)}
+.chk input{
+  width:18px;height:18px;accent-color:var(--accent);cursor:pointer;
+  border-radius:4px;
+}
+.chk .icon{font-size:1.2rem}
+
+/* ===== Ready Box ===== */
+.ready-box{
+  margin-top:20px;padding:28px;border-radius:var(--radius);text-align:center;
+  background:linear-gradient(135deg,rgba(124,92,252,.08),rgba(200,76,253,.08));
+  border:1px solid rgba(124,92,252,.2);
+  animation:fadeIn .5s ease;
+  display:none;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ready-box .label{color:var(--text-dim);font-size:.85rem;margin-bottom:14px;font-weight:500}
+.ready-box .url-box{
+  background:rgba(0,0,0,.3);border-radius:10px;padding:14px;margin-bottom:18px;
+  font-family:'JetBrains Mono',Consolas,monospace;font-size:.75rem;
+  color:#a78bfa;word-break:break-all;text-align:left;
+  max-height:80px;overflow-y:auto;
+  border:1px solid rgba(124,92,252,.15);
+}
+
+/* ===== Preview ===== */
+.preview-card{display:none}
+.preview-box{
+  max-height:350px;overflow-y:auto;
+  background:rgba(0,0,0,.3);border-radius:12px;padding:16px;
+  font-family:'JetBrains Mono',Consolas,monospace;font-size:.75rem;
+  line-height:1.6;color:var(--text-dim);
+  border:1px solid var(--card-border);
+}
+.preview-box pre{white-space:pre-wrap;color:#c8e6c9}
+.preview-box::-webkit-scrollbar{width:6px}
+.preview-box::-webkit-scrollbar-thumb{background:rgba(124,92,252,.3);border-radius:3px}
+
+.node-count{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;font-size:.75rem;font-weight:700;
+  background:linear-gradient(135deg,rgba(124,92,252,.2),rgba(200,76,253,.2));
+  color:#c4b5fd;
+}
+
+/* ===== Collapsible ===== */
+.collapsible{cursor:pointer;user-select:none;position:relative;padding-right:20px}
+.collapsible::after{
+  content:'›';position:absolute;right:0;top:50%;transform:translateY(-50%) rotate(90deg);
+  font-size:1.2rem;color:var(--text-dim);transition:transform .3s;
+}
+.collapsible.open::after{transform:translateY(-50%) rotate(-90deg)}
+.coll-content{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.collapsible.open+.coll-content{max-height:300px}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(120px);
+  padding:14px 28px;border-radius:14px;font-size:.9rem;font-weight:600;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:1000;
+  backdrop-filter:blur(10px);
+}
 .toast.show{transform:translateX(-50%) translateY(0)}
-.toast.ok{background:#10b981}
-.toast.err{background:#ef4444}
-.dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
-.dot.ok{background:#10b981}
-.dot.err{background:#ef4444}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.status{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:.82rem;color:#888}
-.row{display:flex;gap:10px;margin-bottom:14px}
-.row>*{flex:1}
-.chk{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0f0f23;border:1px solid #3a3a5a;border-radius:8px;cursor:pointer;transition:all .2s;font-size:.82rem;user-select:none}
-.chk:hover{border-color:#667eea}
-.chk input{accent-color:#667eea;cursor:pointer}
-.chk.active{border-color:#667eea;background:#1a1a3e}
-.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.collapsible{cursor:pointer;user-select:none}
-.collapsible::after{content:' ▸';font-size:.7rem;color:#666}
-.collapsible.open::after{content:' ▾'}
-.collapsible+.coll-content{max-height:0;overflow:hidden;transition:max-height .3s}
-.collapsible.open+.coll-content{max-height:200px}
-.gh-badge{display:inline-flex;align-items:center;gap:6px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;padding:6px 12px;font-size:.82rem;color:#888;text-decoration:none;margin-bottom:20px}
-.gh-badge:hover{border-color:#667eea;color:#aaa}
+.toast.ok{background:rgba(61,232,192,.2);color:#3de8c0;border:1px solid rgba(61,232,192,.3)}
+.toast.err{background:rgba(255,77,106,.2);color:#ff4d6a;border:1px solid rgba(255,77,106,.3)}
+
+/* ===== Footer ===== */
+.footer{text-align:center;padding:40px 0 20px;color:var(--text-dim);font-size:.78rem}
+.footer a{color:#a78bfa;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+
+/* ===== Responsive ===== */
+@media(max-width:600px){
+  .hero h1{font-size:2rem}
+  .preset-grid{grid-template-columns:1fr}
+  .wrap{padding:20px 14px 60px}
+}
+
+/* ===== Loading Spinner ===== */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div class="container">
-    <h1>SubConverter Wrapper</h1>
-    <p class="sub">VLESS / VMess / SS / SSR / Trojan</p>
 
-    <a class="gh-badge" href="https://github.com/Eugeneofficial/subconverter-wrapper" target="_blank">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub
-    </a>
+<div class="bg-canvas">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
 
-    <div class="status">
-        <div class="dot" id="statusDot"></div>
-        <span id="statusText">Checking backend...</span>
+<div class="wrap">
+  <!-- Hero -->
+  <div class="hero">
+    <h1>SubConverter</h1>
+    <p class="tagline">VLESS / VMess / SS / SSR / Trojan → Clash</p>
+    <div class="badges">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Free & Fast
+      </span>
+      <span class="badge green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        No Hosting
+      </span>
+      <span class="badge" style="background:rgba(200,76,253,.1);color:#c84cfd;border-color:rgba(200,76,253,.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Cloudflare
+      </span>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar">
+    <div class="status-dot wait" id="statusDot"></div>
+    <span class="status-text" id="statusText"><b>Checking</b> backend connection...</span>
+    <button class="btn btn-ghost" onclick="testBackend()" style="flex-shrink:0">Test</button>
+  </div>
+
+  <!-- Settings -->
+  <div class="glass">
+    <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.maxHeight=this.classList.contains('open')?'300px':'0'">
+      <span class="icon">⚙️</span> Settings
+    </h2>
+    <div class="coll-content">
+      <label>Backend URL (Cloudflare Worker)</label>
+      <input type="text" id="backendUrl" placeholder="https://your-worker.workers.dev">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-ghost" onclick="resetBackend()">Reset Default</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Subscriptions -->
+  <div class="glass">
+    <h2><span class="icon">📡</span> Subscriptions</h2>
+
+    <label>Presets</label>
+    <div class="preset-grid">
+      <label class="chk">
+        <input type="checkbox" class="preset-cb" value="BLACK_VLESS_RUS.txt">
+        <span class="icon">🔐</span> BLACK VLESS
+      </label>
+      <label class="chk">
+        <input type="checkbox" class="preset-cb" value="BLACK_VMESS_RUS.txt">
+        <span class="icon">🔷</span> BLACK VMess
+      </label>
+      <label class="chk">
+        <input type="checkbox" class="preset-cb" value="BLACK_TROJAN_RUS.txt">
+        <span class="icon">🐴</span> BLACK Trojan
+      </label>
+      <label class="chk">
+        <input type="checkbox" class="preset-cb" value="BLACK_SS%2BAll_RUS.txt">
+        <span class="icon">🌑</span> BLACK SS+All
+      </label>
     </div>
 
-    <div class="card">
-        <h2 class="collapsible" onclick="this.classList.toggle('open')">Settings</h2>
-        <div class="coll-content" style="overflow:visible">
-            <label>Backend URL (Cloudflare Worker)</label>
-            <input type="text" id="backendUrl" placeholder="https://your-worker.workers.dev">
-            <button class="btn btn-sm" onclick="testBackend()" style="margin-top:8px">Test Connection</button>
-            <button class="btn btn-sm" onclick="resetBackend()" style="margin-top:8px;margin-left:4px">Reset</button>
-        </div>
+    <label>Custom URLs (one per line)</label>
+    <textarea id="urls" placeholder="https://example.com/sub1.txt&#10;https://example.com/sub2.txt"></textarea>
+
+    <div style="margin-top:16px">
+      <label>Target Format</label>
+      <select id="target">
+        <option value="clash">⚡ Clash</option>
+        <option value="clashr">⚡ ClashR</option>
+        <option value="surge&ver=4">🌊 Surge 4</option>
+        <option value="quanx">🔬 Quantumult X</option>
+        <option value="loon">🪝 Loon</option>
+        <option value="surfboard">🏄 Surfboard</option>
+        <option value="v2ray">🚀 V2Ray</option>
+      </select>
     </div>
 
-    <div class="card">
-        <h2>Subscriptions</h2>
+    <button class="btn btn-primary" onclick="generate()" style="margin-top:18px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      Generate
+    </button>
 
-        <label>Preset sources</label>
-        <div class="preset-grid">
-            <label class="chk"><input type="checkbox" class="preset-cb" value="BLACK_VLESS_RUS.txt"> BLACK VLESS</label>
-            <label class="chk"><input type="checkbox" class="preset-cb" value="BLACK_VMESS_RUS.txt"> BLACK VMess</label>
-            <label class="chk"><input type="checkbox" class="preset-cb" value="BLACK_TROJAN_RUS.txt"> BLACK Trojan</label>
-            <label class="chk"><input type="checkbox" class="preset-cb" value="BLACK_SS%2BAll_RUS.txt"> BLACK SS+All</label>
-        </div>
-
-        <label>Custom URLs (one per line)</label>
-        <textarea id="urls" placeholder="https://example.com/sub1.txt&#10;https://example.com/sub2.txt"></textarea>
-
-        <div class="row" style="margin-top:14px">
-            <div>
-                <label>Target</label>
-                <select id="target">
-                    <option value="clash">Clash</option>
-                    <option value="clashr">ClashR</option>
-                    <option value="surge&ver=4">Surge 4</option>
-                    <option value="quanx">Quantumult X</option>
-                    <option value="loon">Loon</option>
-                    <option value="surfboard">Surfboard</option>
-                    <option value="v2ray">V2Ray</option>
-                </select>
-            </div>
-        </div>
-
-        <button class="btn btn-go" onclick="generate()" style="margin-top:6px">Generate</button>
-
-        <div class="result" id="resultBox">
-            <button class="btn-copy" onclick="copyResult()">Copy</button>
-            <div id="resultUrl"></div>
-        </div>
-
-        <div class="ready-box" id="readyBox">
-            <div class="label">Paste this into Clash Verge Rev:</div>
-            <div class="url" id="readyUrl"></div>
-            <button class="btn-big" id="bigCopy" onclick="copyResult();this.textContent='Copied!';this.classList.add('done');setTimeout(()=>{this.textContent='Copy to Clipboard';this.classList.remove('done')},2000)">Copy to Clipboard</button>
-        </div>
+    <!-- Ready Box -->
+    <div class="ready-box" id="readyBox">
+      <div class="label">✨ Ready! Paste into Clash Verge Rev:</div>
+      <div class="url-box" id="readyUrl"></div>
+      <button class="btn btn-big" id="bigCopy" onclick="copyResult()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy to Clipboard
+      </button>
     </div>
+  </div>
 
-    <div class="card" id="previewCard" style="display:none">
-        <h2>
-            Preview
-            <span class="badge" id="proxyCount">0</span>
-            <span style="flex:1"></span>
-            <button class="btn btn-sm" onclick="downloadConfig()">Download</button>
-            <button class="btn btn-sm" onclick="copyConfig()">Copy</button>
-        </h2>
-        <div class="preview" id="previewBox">
-            <pre id="previewContent"></pre>
-        </div>
+  <!-- Preview -->
+  <div class="glass preview-card" id="previewCard">
+    <h2>
+      <span class="icon">👁</span> Preview
+      <span class="node-count" id="proxyCount">0 nodes</span>
+      <span style="flex:1"></span>
+      <button class="btn btn-icon" onclick="downloadConfig()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Save
+      </button>
+      <button class="btn btn-icon" onclick="copyConfig()" style="margin-left:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy
+      </button>
+    </h2>
+    <div class="preview-box" id="previewBox">
+      <pre id="previewContent">Loading...</pre>
     </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <a href="https://github.com/Eugeneofficial/subconverter-wrapper" target="_blank">GitHub</a> ·
+    Powered by <a href="https://github.com/MetaCubeX/subconverter" target="_blank">MetaCubeX</a> ·
+    Hosted on <a href="https://pages.cloudflare.com" target="_blank">Cloudflare</a>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const BASE = 'https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/';
-let generatedUrl = '';
+const BASE='https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/';
+const DEFAULT_BACKEND='https://subconverter-wrapper.abramovplay.workers.dev';
+let generatedUrl='';
 
 // Preset checkboxes
-document.querySelectorAll('.preset-cb').forEach(cb => {
-    cb.addEventListener('change', () => cb.parentElement.classList.toggle('active', cb.checked));
+document.querySelectorAll('.preset-cb').forEach(cb=>{
+  cb.addEventListener('change',()=>cb.parentElement.classList.toggle('active',cb.checked));
 });
 
-// Default backend URL
-const DEFAULT_BACKEND = 'https://subconverter-wrapper.abramovplay.workers.dev';
+// Backend URL management
+function getBackend(){
+  let url=document.getElementById('backendUrl').value.trim().replace(/\/+$/,'');
+  if(!url||!url.startsWith('https://')||url.includes('raw.githubusercontent.com')||url.includes('.txt')||!url.includes('workers.dev')){
+    url=DEFAULT_BACKEND;document.getElementById('backendUrl').value=url;
+  }
+  localStorage.setItem('backendUrl',url);return url;
+}
+const sb=localStorage.getItem('backendUrl');
+if(sb&&sb.startsWith('https://')&&sb.includes('workers.dev')){
+  document.getElementById('backendUrl').value=sb;
+}else{
+  document.getElementById('backendUrl').value=DEFAULT_BACKEND;
+  localStorage.setItem('backendUrl',DEFAULT_BACKEND);
+}
 
-function getBackend() {
-    let url = document.getElementById('backendUrl').value.trim().replace(/\/+$/, '');
-    // Validate: must be a valid URL and not a subscription URL
-    if (!url || !url.startsWith('https://') || url.includes('raw.githubusercontent.com') || url.includes('.txt') || !url.includes('workers.dev')) {
-        url = DEFAULT_BACKEND;
-        document.getElementById('backendUrl').value = url;
+function resetBackend(){
+  localStorage.removeItem('backendUrl');
+  document.getElementById('backendUrl').value=DEFAULT_BACKEND;
+  toast('Reset!');setTimeout(()=>location.reload(),500);
+}
+
+function getAllUrls(){
+  const urls=[];
+  document.querySelectorAll('.preset-cb:checked').forEach(cb=>urls.push(BASE+cb.value));
+  document.getElementById('urls').value.trim().split('\n').forEach(u=>{u=u.trim();if(u)urls.push(u)});
+  return urls;
+}
+
+async function testBackend(){
+  const backend=getBackend(),dot=document.getElementById('statusDot'),txt=document.getElementById('statusText');
+  txt.innerHTML='<b>Testing</b> connection...';dot.className='status-dot wait';
+  try{
+    const c=new AbortController();setTimeout(()=>c.abort(),15000);
+    const r=await fetch(backend+'/health',{signal:c.signal});
+    const raw=await r.text();
+    if(raw.includes('ok')){
+      txt.innerHTML='<b>Connected!</b> Backend is alive';dot.className='status-dot ok';
+      toast('Connection OK!');
+    }else{
+      txt.innerHTML='<b>Warning:</b> '+raw.substring(0,40);dot.className='status-dot err';
     }
-    localStorage.setItem('backendUrl', url);
-    return url;
+  }catch(e){
+    txt.innerHTML='<b>Error:</b> '+e.message;dot.className='status-dot err';
+    toast('Failed!',1);
+  }
 }
 
-// Load saved backend URL (with validation)
-const savedBackend = localStorage.getItem('backendUrl');
-if (savedBackend && savedBackend.startsWith('https://') && savedBackend.includes('workers.dev')) {
-    document.getElementById('backendUrl').value = savedBackend;
-} else {
-    document.getElementById('backendUrl').value = DEFAULT_BACKEND;
-    localStorage.setItem('backendUrl', DEFAULT_BACKEND);
+function generate(){
+  const backend=getBackend();
+  const urls=getAllUrls();
+  if(!urls.length){toast('Select a subscription!',1);return;}
+  const target=document.getElementById('target').value;
+  const p=new URLSearchParams();p.set('target',target);p.set('url',urls.join('|'));
+  generatedUrl=backend+'/sub?'+p.toString();
+  document.getElementById('readyUrl').textContent=generatedUrl;
+  document.getElementById('readyBox').style.display='block';
+  fetchPreview(generatedUrl);
 }
 
-function getAllUrls() {
-    const urls = [];
-    document.querySelectorAll('.preset-cb:checked').forEach(cb => urls.push(BASE + cb.value));
-    document.getElementById('urls').value.trim().split('\n').forEach(u => { u = u.trim(); if (u) urls.push(u); });
-    return urls;
+async function fetchPreview(url){
+  const card=document.getElementById('previewCard'),box=document.getElementById('previewBox');
+  const content=document.getElementById('previewContent'),count=document.getElementById('proxyCount');
+  card.style.display='block';content.textContent='⏳ Loading...';count.textContent='...';
+  try{
+    const r=await fetch(url),text=await r.text();
+    content.textContent=text.substring(0,8000);
+    if(text.length>8000)content.textContent+='\n\n... truncated';
+    const m=text.match(/type:\s*(vless|vmess|ss|ssr|trojan|snell|hysteria|tuic|anytls)/gi);
+    count.textContent=(m?m.length:0)+' nodes';
+  }catch(e){content.textContent='❌ '+e.message;count.textContent='error'}
 }
 
-function resetBackend() {
-    localStorage.removeItem('backendUrl');
-    document.getElementById('backendUrl').value = DEFAULT_BACKEND;
-    toast('Reset to default!');
-    setTimeout(() => location.reload(), 500);
+function copyResult(){
+  navigator.clipboard.writeText(generatedUrl);
+  const btn=document.getElementById('bigCopy');
+  btn.innerHTML='✅ Copied!';btn.classList.add('done');
+  setTimeout(()=>{btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy to Clipboard';btn.classList.remove('done')},2000);
+  toast('Copied!');
 }
 
-async function testBackend() {
-    const backend = getBackend();
-    const dot = document.getElementById('statusDot');
-    const text = document.getElementById('statusText');
-    text.textContent = 'Testing...';
-    dot.className = 'dot';
-    try {
-        const controller = new AbortController();
-        setTimeout(() => controller.abort(), 15000);
-        const resp = await fetch(backend + '/health', { signal: controller.signal });
-        const raw = await resp.text();
-        if (raw.includes('"ok"') || raw.includes('ok')) {
-            text.textContent = 'Backend connected!';
-            dot.className = 'dot ok';
-            toast('Connection OK!');
-        } else {
-            text.textContent = 'Unexpected response: ' + raw.substring(0, 50);
-            dot.className = 'dot err';
-            toast('Unexpected response!', 1);
-        }
-    } catch (e) {
-        text.textContent = 'Failed: ' + e.message;
-        dot.className = 'dot err';
-        toast('Connection failed!', 1);
-    }
+function copyConfig(){navigator.clipboard.writeText(document.getElementById('previewContent').textContent);toast('Config copied!')}
+
+function downloadConfig(){
+  const b=new Blob([document.getElementById('previewContent').textContent],{type:'text/yaml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='clash-config.yaml';a.click();toast('Saved!');
 }
 
-function generate() {
-    const backend = getBackend();
-    if (!backend) { toast('Set backend URL first!', 1); return; }
-    const urls = getAllUrls();
-    if (!urls.length) { toast('Add at least one subscription!', 1); return; }
-    const target = document.getElementById('target').value;
-    const params = new URLSearchParams();
-    params.set('target', target);
-    params.set('url', urls.join('|'));
-    generatedUrl = backend + '/sub?' + params.toString();
-    const fullUrl = generatedUrl;
-    document.getElementById('resultUrl').textContent = fullUrl;
-    document.getElementById('resultBox').style.display = 'block';
-    document.getElementById('readyUrl').textContent = fullUrl;
-    document.getElementById('readyBox').style.display = 'block';
-    fetchPreview(generatedUrl);
+function toast(msg,err){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.className='toast show '+(err?'err':'ok');
+  setTimeout(()=>t.className='toast',2500);
 }
 
-async function fetchPreview(url) {
-    const card = document.getElementById('previewCard');
-    const box = document.getElementById('previewBox');
-    const content = document.getElementById('previewContent');
-    const countEl = document.getElementById('proxyCount');
-    card.style.display = 'block';
-    box.style.display = 'block';
-    content.textContent = 'Loading...';
-    countEl.textContent = '...';
-    try {
-        const resp = await fetch(url);
-        const text = await resp.text();
-        content.textContent = text.substring(0, 8000);
-        if (text.length > 8000) content.textContent += '\n\n... truncated';
-        const m = text.match(/type:\s*(vless|vmess|ss|ssr|trojan|snell|hysteria|tuic|anytls)/gi);
-        countEl.textContent = (m ? m.length : 0) + ' nodes';
-    } catch (e) {
-        content.textContent = 'Error: ' + e.message;
-        countEl.textContent = 'error';
-    }
-}
-
-function copyResult() {
-    navigator.clipboard.writeText(generatedUrl);
-    toast('URL copied!');
-}
-
-function copyConfig() {
-    navigator.clipboard.writeText(document.getElementById('previewContent').textContent);
-    toast('Config copied!');
-}
-
-function downloadConfig() {
-    const text = document.getElementById('previewContent').textContent;
-    const blob = new Blob([text], { type: 'text/yaml' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'clash-config.yaml';
-    a.click();
-    toast('Downloaded!');
-}
-
-function toast(msg, err) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show ' + (err ? 'err' : 'ok');
-    setTimeout(() => t.className = 'toast', 2000);
-}
-
-// Auto-check BLACK VLESS and generate on load
-window.addEventListener('DOMContentLoaded', () => {
-    const cb = document.querySelector('.preset-cb[value="BLACK_VLESS_RUS.txt"]');
-    if (cb) { cb.checked = true; cb.parentElement.classList.add('active'); }
-
-    // Auto-generate if backend is set
-    if (getBackend()) generate();
+// Auto-generate on load
+window.addEventListener('DOMContentLoaded',()=>{
+  const cb=document.querySelector('.preset-cb[value="BLACK_VLESS_RUS.txt"]');
+  if(cb){cb.checked=true;cb.parentElement.classList.add('active')}
+  if(getBackend())generate();
 });
 
-// Check backend status
-(async function checkStatus() {
-    const backend = getBackend();
-    if (!backend) {
-        document.getElementById('statusText').textContent = 'Set backend URL above';
-        document.getElementById('statusDot').className = 'dot err';
-        return;
-    }
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        const resp = await fetch(backend + '/health', { signal: controller.signal });
-        clearTimeout(timeoutId);
-        const raw = await resp.text();
-        if (raw.includes('"ok"') || raw.includes('ok')) {
-            document.getElementById('statusText').textContent = 'Backend connected';
-            document.getElementById('statusDot').className = 'dot ok';
-        } else {
-            document.getElementById('statusText').textContent = 'Backend responded but unexpected';
-            document.getElementById('statusDot').className = 'dot err';
-        }
-    } catch (e) {
-        document.getElementById('statusText').textContent = 'Backend unreachable (click Generate to try anyway)';
-        document.getElementById('statusDot').className = 'dot err';
-    }
+// Health check
+(async()=>{
+  const backend=getBackend(),dot=document.getElementById('statusDot'),txt=document.getElementById('statusText');
+  if(!backend){txt.innerHTML='<b>Set</b> backend URL in Settings';dot.className='status-dot err';return;}
+  try{
+    const c=new AbortController();setTimeout(()=>c.abort(),10000);
+    const r=await fetch(backend+'/health',{signal:c.signal});
+    const raw=await r.text();
+    if(raw.includes('ok')){txt.innerHTML='<b>Connected</b> — ready to generate';dot.className='status-dot ok'}
+    else{txt.innerHTML='<b>Warning:</b> unexpected response';dot.className='status-dot err'}
+  }catch(e){txt.innerHTML='<b>Offline</b> — click Generate to try';dot.className='status-dot err'}
 })();
 </script>
 </body>
