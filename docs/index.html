@@ -300,8 +300,7 @@ async function test(){
   const d=document.getElementById('sdot'),t=document.getElementById('stxt');
   t.innerHTML='<b>Testing</b>...';d.className='sdot wait';
   try{
-    const c=new AbortController();setTimeout(()=>c.abort(),15000);
-    const r=await fetch(getBackend()+'/health',{signal:c.signal});
+    const r=await fetch(getBackend()+'/health');
     const raw=await r.text();
     if(raw.includes('ok')){t.innerHTML='<b>Connected!</b>';d.className='sdot ok';toast('OK!')}
     else{t.innerHTML='<b>Warning</b>';d.className='sdot err'}
@@ -375,8 +374,7 @@ initSources();initFilters();
 (async()=>{
   const d=document.getElementById('sdot'),t=document.getElementById('stxt');
   try{
-    const c=new AbortController();setTimeout(()=>c.abort(),10000);
-    const r=await fetch(getBackend()+'/health',{signal:c.signal});
+    const r=await fetch(getBackend()+'/health');
     const raw=await r.text();
     if(raw.includes('ok')){t.innerHTML='<b>Connected</b> — ready';d.className='sdot ok'}
     else{t.innerHTML='<b>Warning</b>';d.className='sdot err'}
