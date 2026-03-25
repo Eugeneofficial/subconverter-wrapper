@@ -322,9 +322,10 @@ function generate(){
 async function fetchPreview(url){
   const card=document.getElementById('prevCard'),box=document.getElementById('prevBox');
   const content=document.getElementById('prevContent'),count=document.getElementById('ncount');
-  card.style.display='block';content.textContent='⏳ Loading...';count.textContent='...';
+  card.style.display='block';content.textContent='⏳ Loading preview...';count.textContent='...';
   try{
     const r=await fetch(url),text=await r.text();
+    if(!r.ok)throw new Error('HTTP '+r.status);
     fullConfig=text;
     // Apply filters
     let filtered=text;
@@ -357,7 +358,10 @@ async function fetchPreview(url){
     if(filtered.length>15000)content.textContent+='\n\n... (download for full)';
     const m=filtered.match(/type:\s*(vless|vmess|ss|ssr|trojan)/gi);
     count.textContent=(m?m.length:0)+' nodes';
-  }catch(e){content.textContent='❌ '+e.message;count.textContent='error'}
+  }catch(e){
+    content.textContent='⚠️ Preview unavailable (Cloudflare blocked in your region)\n\nBut the URL works! Copy it and paste into Clash Verge Rev.\nClash will fetch the config directly.\n\nError: '+e.message;
+    count.textContent='N/A';
+  }
 }
 
 function copyUrl(){navigator.clipboard.writeText(generatedUrl);const b=document.getElementById('bigCopy');b.innerHTML='✅ Copied!';b.classList.add('done');setTimeout(()=>{b.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy to Clipboard';b.classList.remove('done')},2000);toast('Copied!')}
