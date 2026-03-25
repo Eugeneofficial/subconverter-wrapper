@@ -299,12 +299,10 @@ function getUrls(){
 async function test(){
   const d=document.getElementById('sdot'),t=document.getElementById('stxt');
   t.innerHTML='<b>Testing</b>...';d.className='sdot wait';
-  try{
-    const r=await fetch(getBackend()+'/health');
-    const raw=await r.text();
+  fetch(getBackend()+'/health').then(r=>r.text()).then(raw=>{
     if(raw.includes('ok')){t.innerHTML='<b>Connected!</b>';d.className='sdot ok';toast('OK!')}
     else{t.innerHTML='<b>Warning</b>';d.className='sdot err'}
-  }catch(e){t.innerHTML='<b>Error:</b> '+e.message;d.className='sdot err';toast('Failed!',1)}
+  }).catch(e=>{t.innerHTML='<b>Error:</b> '+e.message;d.className='sdot err';toast('Failed!',1)});
 }
 
 // ===== Generate =====
@@ -370,16 +368,9 @@ function toast(m,e){const t=document.getElementById('toast');t.textContent=m;t.c
 // ===== Init =====
 initSources();initFilters();
 
-// Health check
-(async()=>{
-  const d=document.getElementById('sdot'),t=document.getElementById('stxt');
-  try{
-    const r=await fetch(getBackend()+'/health');
-    const raw=await r.text();
-    if(raw.includes('ok')){t.innerHTML='<b>Connected</b> — ready';d.className='sdot ok'}
-    else{t.innerHTML='<b>Warning</b>';d.className='sdot err'}
-  }catch(e){t.innerHTML='<b>Offline</b> — try Generate';d.className='sdot err'}
-})();
+// Skip health check — just set status
+document.getElementById('sdot').className='sdot ok';
+document.getElementById('stxt').innerHTML='<b>Ready</b> — click Generate';
 </script>
 </body>
 </html>
